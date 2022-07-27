@@ -63,5 +63,3 @@ function decryptCaesar(ciphertext:string, key:number) {
 	}
 	return arr.join('');
 }
-console.log(encryptCaesar('Didi Family', 10)); // "nsns pkwsvi"
-console.log(decryptCaesar('"nsns pkwsvi"', 10));
