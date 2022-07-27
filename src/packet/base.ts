@@ -4,11 +4,13 @@ export  class PacketBase{
     #type: string | undefined;
     #action : string | undefined;
     #params : Map<string,object | string | boolean | number>;
-    #id : string;
+    id : string;
+    #protocol : string;
     constructor(){
         this.#date = new Date().getTime();
         this.#params = new Map();
-        this.#id = guid();
+        this.id = guid();
+        this.#protocol = 'undefined';
     }
     setType(ty:string){
         this.#type = ty;
@@ -16,11 +18,14 @@ export  class PacketBase{
     setAction(ac:string){
         this.#action = ac;
     }
-    setParams(key:string,value:object | string | number | boolean){
+    setParam(key:string,value:object | string | number | boolean){
         this.#params?.set(key,value);
     }
+    setProtocol(protocol:string){
+        this.#protocol = protocol;
+    }
     getSendableString(){
-        return JSON.stringify({date:this.#date,type:this.#type,params:Object.fromEntries(this.#params)});
+        return JSON.stringify({id:this.id, protocol:this.#protocol, date:this.#date,type:this.#type,params:Object.fromEntries(this.#params)});
     }
     getType(){
         return this.#type;
@@ -31,11 +36,11 @@ export  class PacketBase{
     getParams(){
         return Object.fromEntries(this.#params);
     }
+    get protocol(){
+        return this.#protocol;
+    }
     get date(){
         return this.#date;
-    }
-    get id(){
-        return this.#id;
     }
     static parse(raw_pack:string){
         let tmp = JSON.parse(raw_pack);
@@ -48,10 +53,19 @@ export  class PacketBase{
             throw new Error('missing the param : type or action, bad pack!!');
         }
         for(let i in tmp.params){
-            pack.setParams(i,tmp.params[i]);
+            pack.setParam(i,tmp.params[i]);
         }
-        pack.#date = tmp.date;
-        pack.#id = tmp.id;
+        if(typeof tmp.date != 'undefined'){
+            pack.#date = tmp.date;
+        }else{
+            throw new Error('missing the param : date, bad pack!!');
+        }
+        if(typeof tmp.protocol != 'undefined'){
+            pack.#protocol = tmp.protocol;
+        }else{
+            throw new Error('missing the param : protocol, bad pack!!');
+        }
+        pack.id = tmp.id;
         return pack;
     }
 }
